@@ -31,6 +31,10 @@ export class StoreAWS implements IStore{
         this.settings.paramPostFix = storePostfix
         let seedkey = process.env.DEFICHAIN_SEED_KEY ?? StoreKey.DeFiWalletSeed
 
+        let TelegramNotificationChatIdKey = StoreKey.TelegramNotificationChatId.replace("-maxi", "-maxi" + storePostfix)
+        let TelegramNotificationTokenKey = StoreKey.TelegramNotificationToken.replace("-maxi", "-maxi" + storePostfix)
+        let TelegramLogsChatIdKey = StoreKey.TelegramLogsChatId.replace("-maxi", "-maxi" + storePostfix)
+        let TelegramLogsTokenKey = StoreKey.TelegramLogsToken.replace("-maxi", "-maxi" + storePostfix)
         let DeFiAddressKey = StoreKey.DeFiAddress.replace("-maxi", "-maxi" + storePostfix)
         let DeFiVaultKey = StoreKey.DeFiVault.replace("-maxi", "-maxi" + storePostfix)
         let MinCollateralRatioKey = StoreKey.MinCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
@@ -40,10 +44,10 @@ export class StoreAWS implements IStore{
         let StateKey = StoreKey.State.replace("-maxi", "-maxi" + storePostfix)
 
         let keys = [
-            StoreKey.TelegramNotificationChatId,
-            StoreKey.TelegramNotificationToken,
-            StoreKey.TelegramLogsChatId,
-            StoreKey.TelegramLogsToken,
+            TelegramNotificationChatIdKey,
+            TelegramNotificationTokenKey,
+            TelegramLogsChatIdKey,
+            TelegramLogsTokenKey,
             DeFiAddressKey,
             DeFiVaultKey,
             MinCollateralRatioKey,
@@ -56,10 +60,10 @@ export class StoreAWS implements IStore{
         //store only allows to get 10 parameters per request
         let parameters = (await this.ssm.getParameters({
             Names: [
-                StoreKey.TelegramNotificationChatId,
-                StoreKey.TelegramNotificationToken,
-                StoreKey.TelegramLogsChatId,
-                StoreKey.TelegramLogsToken,
+                TelegramNotificationChatIdKey,
+                TelegramNotificationTokenKey,
+                TelegramLogsChatIdKey,
+                TelegramLogsTokenKey,
             ]
         }).promise()).Parameters ?? []
 
@@ -85,10 +89,10 @@ export class StoreAWS implements IStore{
             console.error("Seed Parameter not found!")
             decryptedSeed= undefined
         }
-        this.settings.chatId = this.getValue(StoreKey.TelegramNotificationChatId, parameters)
-        this.settings.token = this.getValue(StoreKey.TelegramNotificationToken, parameters)
-        this.settings.logChatId = this.getValue(StoreKey.TelegramLogsChatId, parameters)
-        this.settings.logToken = this.getValue(StoreKey.TelegramLogsToken, parameters)
+        this.settings.chatId = this.getValue(TelegramNotificationChatIdKey, parameters)
+        this.settings.token = this.getValue(TelegramNotificationTokenKey, parameters)
+        this.settings.logChatId = this.getValue(TelegramLogsChatIdKey, parameters)
+        this.settings.logToken = this.getValue(TelegramLogsTokenKey, parameters)
         this.settings.address = this.getValue(DeFiAddressKey, parameters)
         this.settings.vault = this.getValue(DeFiVaultKey, parameters)
         this.settings.minCollateralRatio = this.getNumberValue(MinCollateralRatioKey, parameters) ?? this.settings.minCollateralRatio

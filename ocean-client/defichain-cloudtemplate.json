@@ -279,7 +279,7 @@
       "Condition": "CreateMonitoringUser",
       "Properties": {
         "UserName": {
-          "Ref": "MonitoringUsername"
+          "Fn::Sub" : "${MonitoringUsername}-${AWS::StackName}"
         },
         "Path": "/",
         "LoginProfile": {
@@ -309,10 +309,10 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/defichain-maxi/*-collateral-ratio"
+                      "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/defichain-maxi-${AWS::StackName}/*-collateral-ratio"
                     },
                     {
-                      "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/defichain-maxi/lm-token"
+                      "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/defichain-maxi-${AWS::StackName}/lm-token"
                     }
                   ]
                 },
@@ -324,7 +324,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/defichain-maxi/state"
+                      "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/defichain-maxi-${AWS::StackName}/state"
                     }
                   ]
                 },
@@ -425,7 +425,9 @@
                         {
                           "Ref": "AWS::AccountId"
                         },
-                        "parameter/defichain-maxi/*"
+                        {
+                          "Fn::Sub": "parameter/defichain-maxi-${AWS::StackName}/*"
+                        }
                       ]
                     ]
                   }
@@ -446,7 +448,9 @@
                         {
                           "Ref": "AWS::AccountId"
                         },
-                        "parameter/defichain-maxi/state"
+                        {
+                          "Fn::Sub": "parameter/defichain-maxi-${AWS::StackName}/state"
+                        }
                       ]
                     ]
                   }
@@ -460,7 +464,9 @@
     "vaultMaxiTrigger": {
       "Type": "AWS::Events::Rule",
       "Properties": {
-        "Name": "vaultMaxiTrigger",
+        "Name": {
+          "Fn::Sub": "vaultMaxiTrigger-${AWS::StackName}"
+        },
         "Description": "Triggers the vault maxi",
         "ScheduleExpression": "rate(15 minutes)",
         "Targets": [
@@ -496,7 +502,9 @@
     "vaultMaxiLambda": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
-        "FunctionName": "defichain-vault-maxi",
+        "FunctionName": {
+          "Fn::Sub": "maxi-${AWS::StackName}"
+        },
         "Handler": "index.main",
         "Role": {
           "Fn::GetAtt": [
@@ -504,9 +512,19 @@
             "Arn"
           ]
         },
+        "Environment": {
+          "Variables": {
+            "VAULTMAXI_STORE_POSTIX": {
+              "Fn::Sub": "-${AWS::StackName}"
+            },
+            "DEFICHAIN_SEED_KEY": {
+              "Fn::Sub": "/defichain-maxi-${AWS::StackName}/wallet/seed"
+            }
+          }
+        },
         "Code": {
-          "S3Bucket": {"Fn::Sub": "defichain-maxi-public-${AWS::Region}"},
-          "S3Key": "vault-maxi-1-0.zip"
+          "S3Bucket": {"Fn::Sub": "one.alpa.test.eu.central.bucket"},
+          "S3Key": "defichain-maxi/vault-maxi.zip"
         },
         "Runtime": "nodejs14.x",
         "Timeout": 890
@@ -518,7 +536,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "(Optional) Threshold for reinvesting measured in DFI",
-        "Name": "/defichain-maxi/settings/reinvest",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/reinvest"
+        },
         "Type": "String",
         "Value": {
           "Ref": "MinReinvest"
@@ -531,7 +551,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "(Optional) Telegram ChatId for notifications",
-        "Name": "/defichain-maxi/telegram/notifications/chat-id",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/telegram/notifications/chat-id"
+        },
         "Type": "String",
         "Value": {
           "Ref": "TelegramNotificationChatId"
@@ -544,7 +566,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "(Optional) Telegram Token for notifications",
-        "Name": "/defichain-maxi/telegram/notifications/token",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/telegram/notifications/token"
+        },
         "Type": "String",
         "Value": {
           "Ref": "TelegramNotificationToken"
@@ -557,7 +581,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "(Optional) Telegram Bot ChatId for log messages",
-        "Name": "/defichain-maxi/telegram/logs/chat-id",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/telegram/logs/chat-id"
+        },
         "Type": "String",
         "Value": {
           "Ref": "TelegramLogsChatId"
@@ -570,7 +596,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "(Optional) Telegram Bot Token for log messages",
-        "Name": "/defichain-maxi/telegram/logs/token",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/telegram/logs/token"
+        },
         "Type": "String",
         "Value": {
           "Ref": "TelegramLogsToken"
@@ -582,7 +610,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "Your defichain address",
-        "Name": "/defichain-maxi/wallet/address",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/wallet/address"
+        },
         "Type": "String",
         "Value": {
           "Ref": "DeFiAddress"
@@ -594,7 +624,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "Id of your defichain vault (address must be owner)",
-        "Name": "/defichain-maxi/wallet/vault",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/wallet/vault"
+        },
         "Type": "String",
         "Value": {
           "Ref": "DeFiVault"
@@ -606,7 +638,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "minimum collateral ratio",
-        "Name": "/defichain-maxi/settings/min-collateral-ratio",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/min-collateral-ratio"
+        },
         "Type": "String",
         "Value": {
           "Ref": "MinCollateralRatio"
@@ -618,7 +652,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "maximum collateral ratio",
-        "Name": "/defichain-maxi/settings/max-collateral-ratio",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/max-collateral-ratio"
+        },
         "Type": "String",
         "Value": {
           "Ref": "MaxCollateralRatio"
@@ -630,7 +666,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "the dToken to use for LM",
-        "Name": "/defichain-maxi/settings/lm-token",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/lm-token"
+        },
         "Type": "String",
         "Value": {
           "Ref": "LMToken"
@@ -642,7 +680,9 @@
       "Properties": {
         "DataType": "text",
         "Description": "the state of last execution. DO NOT CHANGE THIS VALUE",
-        "Name": "/defichain-maxi/state",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/state"
+        },
         "Type": "String",
         "Value": "start"
       }
