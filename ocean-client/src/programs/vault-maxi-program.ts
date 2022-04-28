@@ -408,6 +408,7 @@ export class VaultMaxiProgram extends CommonProgram {
     }
 
 
+    //TODO: adjust reinvest logic
     async checkAndDoReinvest(vault: LoanVaultActive, telegram: Telegram): Promise<boolean> {
         if (!this.settings.reinvestThreshold || this.settings.reinvestThreshold <= 0) {
             return false
@@ -431,7 +432,7 @@ export class VaultMaxiProgram extends CommonProgram {
 
         if (amountToUse.gt(this.settings.reinvestThreshold)) {
             console.log("depositing " + amountToUse + " (" + amountFromBalance + "+" + fromUtxos + ") DFI to vault ")
-            const tx = await this.depositToVault(0, amountToUse, prevout) //DFI is token 0
+            const tx = await this.depositToVault(this.settings.tokenId, amountToUse, prevout) //DFI is token 0
             await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.Reinvest, tx.txId)
             if (! await this.waitForTx(tx.txId)) {
                 await telegram.send("ERROR: depositing reinvestment failed")

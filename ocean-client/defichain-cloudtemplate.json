@@ -19,6 +19,7 @@
           "Parameters": [
             "MinCollateralRatio",
             "MaxCollateralRatio",
+            "TokenId",
             "LMToken",
             "MinReinvest"
           ]
@@ -50,6 +51,9 @@
         },
         "DeFiVault": {
           "default": "Defichain Vault Id"
+        },
+        "TokenId": {
+          "default": "Defichain Token Id"
         },
         "MinCollateralRatio": {
           "default": "Minimum Collateral Ratio"
@@ -115,6 +119,12 @@
       "MinValue": 151,
       "Default": "200",
       "Description": "If vault goes below this, the script will decrease LM exposure"
+    },
+    "TokenId": {
+      "Type": "Number",
+      "MinValue": 0,
+      "Default": "0",
+      "Description": "The DFI Token ID."
     },
     "MaxCollateralRatio": {
       "Type": "Number",
@@ -644,6 +654,20 @@
         "Type": "String",
         "Value": {
           "Ref": "MinCollateralRatio"
+        }
+      }
+    },
+    "vaultMaxiParamTokenId": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "DataType": "text",
+        "Description": "token id",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/token-id"
+        },
+        "Type": "String",
+        "Value": {
+          "Ref": "TokenId"
         }
       }
     },

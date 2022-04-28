@@ -11,6 +11,7 @@ import { BigNumber } from "@defichain/jellyfish-api-core";
 import { WhaleClientTimeoutException } from '@defichain/whale-api-client'
 
 class SettingsOverride {
+    tokenId: number | undefined
     minCollateralRatio: number | undefined
     maxCollateralRatio: number | undefined
     LMToken: string | undefined
@@ -42,6 +43,8 @@ export async function main(event: maxiEvent, context: any): Promise<Object> {
                     settings.minCollateralRatio = event.overrideSettings.minCollateralRatio
                 if (event.overrideSettings.LMToken)
                     settings.LMToken = event.overrideSettings.LMToken
+                if (event.overrideSettings.tokenId)
+                    settings.tokenId = event.overrideSettings.tokenId
             }
         }
         const logId = process.env.VAULTMAXI_LOGID ? (" " + process.env.VAULTMAXI_LOGID) : ""

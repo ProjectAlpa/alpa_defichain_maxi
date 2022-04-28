@@ -40,6 +40,7 @@ export class StoreAWS implements IStore{
         let MinCollateralRatioKey = StoreKey.MinCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
         let MaxCollateralRatioKey = StoreKey.MaxCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
         let ReinvestThreshold = StoreKey.ReinvestThreshold.replace("-maxi", "-maxi" + storePostfix)
+        let TokenIdKey = StoreKey.TokenId.replace("-maxi", "-maxi" + storePostfix)
         let LMTokenKey = StoreKey.LMToken.replace("-maxi", "-maxi" + storePostfix)
         let StateKey = StoreKey.State.replace("-maxi", "-maxi" + storePostfix)
 
@@ -52,6 +53,7 @@ export class StoreAWS implements IStore{
             DeFiVaultKey,
             MinCollateralRatioKey,
             MaxCollateralRatioKey,
+            TokenIdKey,
             LMTokenKey,
             StateKey,
             ReinvestThreshold,
@@ -73,6 +75,7 @@ export class StoreAWS implements IStore{
                 DeFiVaultKey,
                 MinCollateralRatioKey,
                 MaxCollateralRatioKey,
+                TokenIdKey,
                 LMTokenKey,
                 StateKey,
                 ReinvestThreshold,
@@ -97,6 +100,7 @@ export class StoreAWS implements IStore{
         this.settings.vault = this.getValue(DeFiVaultKey, parameters)
         this.settings.minCollateralRatio = this.getNumberValue(MinCollateralRatioKey, parameters) ?? this.settings.minCollateralRatio
         this.settings.maxCollateralRatio = this.getNumberValue(MaxCollateralRatioKey, parameters) ?? this.settings.maxCollateralRatio
+        this.settings.tokenId = this.getNumberValue(TokenIdKey, parameters) ?? this.settings.tokenId
         this.settings.LMToken = this.getValue(LMTokenKey, parameters)
         this.settings.reinvestThreshold = this.getNumberValue(ReinvestThreshold, parameters)
         this.settings.stateInformation = ProgramStateConverter.fromValue(this.getValue(StateKey, parameters))
@@ -131,6 +135,7 @@ enum StoreKey {
     DeFiWalletSeed = '/defichain-maxi/wallet/seed',
     MinCollateralRatio = '/defichain-maxi/settings/min-collateral-ratio',
     MaxCollateralRatio = '/defichain-maxi/settings/max-collateral-ratio',
+    TokenId = '/defichain-maxi/settings/token-id',
     LMToken = '/defichain-maxi/settings/lm-token',
     ReinvestThreshold = '/defichain-maxi/settings/reinvest',
     State = '/defichain-maxi/state',

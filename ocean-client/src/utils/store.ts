@@ -49,6 +49,7 @@ export class StoredSettings {
     seed: string[] = []
     minCollateralRatio: number = 200
     maxCollateralRatio: number = 250
+    tokenId: number = 0
     LMToken: string = "GLD"
     reinvestThreshold: number | undefined
     stateInformation: ProgramStateInformation = { state: ProgramState.Idle, tx: '', txId: '', blockHeight: 0 }
