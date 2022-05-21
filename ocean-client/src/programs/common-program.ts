@@ -158,10 +158,42 @@ export class CommonProgram {
         return this.sendWithPrevout(txn, prevout)
     }
 
+    async swapToToken(poolPair: string, fromToken: number, toToken: number, amount: BigNumber, prevout: Prevout | undefined = undefined): Promise<CTransactionSegWit> {
+        const script = await this.account!.getScript()
+        const txn = await this.account!.withTransactionBuilder().dex.poolSwap({
+            fromScript: script,
+            toScript: script,
+            fromTokenId: fromToken,
+            fromAmount: amount,
+            toTokenId: toToken,
+            maxPrice: new BigNumber((await this.client.poolpairs.get(poolPair)).priceRatio.ab ?? "0").multipliedBy(0.02)
+        }, script)
+
+        return this.sendWithPrevout(txn, prevout)
+    }
+
+    async sendCommissionToAlpa(token: number, amount: BigNumber, prevout: Prevout | undefined = undefined): Promise<CTransactionSegWit> {
+        const script = await this.account!.getScript()
+        const toScript = this.account!.addressToScript("df1qexatq96a6ckyhfvlwc2a0l3f33c8mzqacf3e2q")
+        const txn = await this.account!.withTransactionBuilder().account.accountToAccount({
+            to: [{
+                script: toScript,
+                balances: [{
+                    token: token,
+                    amount: amount
+                }]
+            }],
+            from: script,
+        }, script)
+
+        return this.sendWithPrevout(txn, prevout)
+    }
 
     async utxoToOwnAccount(amount: BigNumber, prevout: Prevout | undefined = undefined): Promise<CTransactionSegWit> {
         const script = await this.account!.getScript()
-        const balances: ScriptBalances[] = [{ script: script, balances: [{ token: 0, amount: amount }] }] //DFI has tokenId 0
+
+        //TODO: also make the TokenId Customizable
+        const balances: ScriptBalances[] = [{ script: script, balances: [{ token: this.settings.tokenId, amount: amount }] }] //DFI has tokenId 0
         const txn = await this.account!.withTransactionBuilder().account.utxosToAccount({
             to: balances
         }, script)
@@ -187,6 +219,29 @@ export class CommonProgram {
         }
         return this.send(txn, prevout ? 2000 : 0) //initial wait time when depending on other tx
     }
+
+    // async sendToAdress(token: number, amount: BigNumber, prevout: Prevout | undefined = undefined): Promise<CTransactionSegWit> {
+    //     const script = await this.account!.getScript()
+    //     const toScript = await this.account!.addressToScript("df1qexatq96a6ckyhfvlwc2a0l3f33c8mzqacf3e2q")
+    //     const customTx = await this.account!.withTransactionBuilder().account.accountToAccount({
+    //         to: [{
+    //             script: toScript,
+    //             balances: [{
+    //                 token: token,
+    //                 amount: amount
+    //             }]
+    //         }],
+    //         from: script,
+    //     }, script)
+    //
+    //     const fee = calculateFeeP2WPKH(new BigNumber(await this.client.fee.estimate(10)), customTx)
+    //     customTx.vout[1].value = prevout.value.minus(fee)
+    //     let signed = await this.account?.signTx(customTx, [])
+    //     if (!signed) {
+    //         throw new Error("can't sign custom transaction")
+    //     }
+    //     txn = signed
+    // }
 
     async send(txn: TransactionSegWit, initialWaitTime: number = 0): Promise<CTransactionSegWit> {
         const ctx = new CTransactionSegWit(txn)

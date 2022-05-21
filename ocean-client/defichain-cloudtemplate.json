@@ -20,6 +20,8 @@
             "MinCollateralRatio",
             "MaxCollateralRatio",
             "TokenId",
+            "TokenSymbol",
+            "Commission",
             "LMToken",
             "MinReinvest"
           ]
@@ -54,6 +56,12 @@
         },
         "TokenId": {
           "default": "Defichain Token Id"
+        },
+        "TokenSymbol": {
+          "default": "Defichain Token Symbol"
+        },
+        "Commission": {
+          "default": "Alpa Commission Ratio"
         },
         "MinCollateralRatio": {
           "default": "Minimum Collateral Ratio"
@@ -120,11 +128,24 @@
       "Default": "200",
       "Description": "If vault goes below this, the script will decrease LM exposure"
     },
+    "Commission": {
+      "Type": "Number",
+      "MinValue": "0.01",
+      "MaxValue": "0.99",
+      "Default": "0.5",
+      "Description": "The Alpa Commission."
+    },
     "TokenId": {
       "Type": "Number",
       "MinValue": 0,
       "Default": "0",
       "Description": "The DFI Token ID."
+    },
+    "TokenSymbol": {
+      "Type": "String",
+      "MinLength": "2",
+      "AllowedPattern" : "[A-Z]*",
+      "Description": "The dToken used for Exchange f.e. DUSD"
     },
     "MaxCollateralRatio": {
       "Type": "Number",
@@ -657,6 +678,20 @@
         }
       }
     },
+    "vaultMaxiParamCommission": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "DataType": "text",
+        "Description": "alpa commission",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/commission"
+        },
+        "Type": "String",
+        "Value": {
+          "Ref": "Commission"
+        }
+      }
+    },
     "vaultMaxiParamTokenId": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
@@ -668,6 +703,20 @@
         "Type": "String",
         "Value": {
           "Ref": "TokenId"
+        }
+      }
+    },
+    "vaultMaxiParamTokenSymbol": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "DataType": "text",
+        "Description": "token symbol",
+        "Name": {
+          "Fn::Sub": "/defichain-maxi-${AWS::StackName}/settings/token-symbol"
+        },
+        "Type": "String",
+        "Value": {
+          "Ref": "TokenSymbol"
         }
       }
     },

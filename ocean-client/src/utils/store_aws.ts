@@ -40,7 +40,9 @@ export class StoreAWS implements IStore{
         let MinCollateralRatioKey = StoreKey.MinCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
         let MaxCollateralRatioKey = StoreKey.MaxCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
         let ReinvestThreshold = StoreKey.ReinvestThreshold.replace("-maxi", "-maxi" + storePostfix)
+        let CommissionKey = StoreKey.Commission.replace("-maxi", "-maxi" + storePostfix)
         let TokenIdKey = StoreKey.TokenId.replace("-maxi", "-maxi" + storePostfix)
+        let TokenSymbolKey = StoreKey.TokenSymbol.replace("-maxi", "-maxi" + storePostfix)
         let LMTokenKey = StoreKey.LMToken.replace("-maxi", "-maxi" + storePostfix)
         let StateKey = StoreKey.State.replace("-maxi", "-maxi" + storePostfix)
 
@@ -53,7 +55,9 @@ export class StoreAWS implements IStore{
             DeFiVaultKey,
             MinCollateralRatioKey,
             MaxCollateralRatioKey,
+            CommissionKey,
             TokenIdKey,
+            TokenSymbolKey,
             LMTokenKey,
             StateKey,
             ReinvestThreshold,
@@ -75,7 +79,9 @@ export class StoreAWS implements IStore{
                 DeFiVaultKey,
                 MinCollateralRatioKey,
                 MaxCollateralRatioKey,
+                CommissionKey,
                 TokenIdKey,
+                TokenSymbolKey,
                 LMTokenKey,
                 StateKey,
                 ReinvestThreshold,
@@ -100,7 +106,9 @@ export class StoreAWS implements IStore{
         this.settings.vault = this.getValue(DeFiVaultKey, parameters)
         this.settings.minCollateralRatio = this.getNumberValue(MinCollateralRatioKey, parameters) ?? this.settings.minCollateralRatio
         this.settings.maxCollateralRatio = this.getNumberValue(MaxCollateralRatioKey, parameters) ?? this.settings.maxCollateralRatio
+        this.settings.commission = this.getNumberValue(CommissionKey, parameters) ?? this.settings.commission
         this.settings.tokenId = this.getNumberValue(TokenIdKey, parameters) ?? this.settings.tokenId
+        this.settings.tokenSymbol = this.getValue(TokenSymbolKey, parameters) ?? this.settings.tokenSymbol
         this.settings.LMToken = this.getValue(LMTokenKey, parameters)
         this.settings.reinvestThreshold = this.getNumberValue(ReinvestThreshold, parameters)
         this.settings.stateInformation = ProgramStateConverter.fromValue(this.getValue(StateKey, parameters))
@@ -135,7 +143,9 @@ enum StoreKey {
     DeFiWalletSeed = '/defichain-maxi/wallet/seed',
     MinCollateralRatio = '/defichain-maxi/settings/min-collateral-ratio',
     MaxCollateralRatio = '/defichain-maxi/settings/max-collateral-ratio',
+    Commission = '/defichain-maxi/settings/commission',
     TokenId = '/defichain-maxi/settings/token-id',
+    TokenSymbol = '/defichain-maxi/settings/token-symbol',
     LMToken = '/defichain-maxi/settings/lm-token',
     ReinvestThreshold = '/defichain-maxi/settings/reinvest',
     State = '/defichain-maxi/state',

@@ -16,6 +16,8 @@ export enum VaultMaxiProgramTransaction {
     None = "none",
     RemoveLiquidity = "removeliquidity",
     PaybackLoan = "paybackloan",
+    PayoutCommission = "payoutcommission",
+    SwapTokens = "swaptokens",
     TakeLoan = "takeloan",
     AddLiquidity = "addliquidity",
     Reinvest = "reinvest"
@@ -407,39 +409,70 @@ export class VaultMaxiProgram extends CommonProgram {
         }
     }
 
-
-    //TODO: adjust reinvest logic
     async checkAndDoReinvest(vault: LoanVaultActive, telegram: Telegram): Promise<boolean> {
         if (!this.settings.reinvestThreshold || this.settings.reinvestThreshold <= 0) {
             return false
         }
 
         const utxoBalance = await this.getUTXOBalance()
-        const tokenBalance = await this.getTokenBalance("DFI")
+        const tokenRewardBalance = await this.getTokenBalance("DFI")
+        const tokenBalance = await this.getTokenBalance(this.settings.tokenSymbol)
 
-        const amountFromBalance = new BigNumber(tokenBalance?.amount ?? "0")
+        const amountFromTokenRewardBalance = new BigNumber(tokenRewardBalance?.amount ?? "0")
+        const amountFromTokenBalance = new BigNumber(tokenBalance?.amount ?? "0")
         const fromUtxos = utxoBalance.gt(1) ? utxoBalance.minus(1) : new BigNumber(0)
-        const amountToUse = fromUtxos.plus(amountFromBalance)
+        const amountToUse = fromUtxos.plus(amountFromTokenRewardBalance)
 
         let prevout: Prevout | undefined = undefined
-        console.log("checking for reinvest: " + fromUtxos + " from UTXOs, " + amountFromBalance + " tokens. total " + amountToUse + " vs " + this.settings.reinvestThreshold)
+        console.log("checking for reinvest: " + fromUtxos + " from UTXOs, " + amountFromTokenRewardBalance + " DFI tokens. total " + amountToUse + " vs " + this.settings.reinvestThreshold)
         if (amountToUse.gt(this.settings.reinvestThreshold) && fromUtxos.gt(0)) {
-            console.log("converting " + fromUtxos + " UTXOs to token ")
+            console.log("converting " + fromUtxos + " UTXOs to DFI token ")
             const tx = await this.utxoToOwnAccount(fromUtxos)
             await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.Reinvest, tx.txId)
             prevout = this.prevOutFromTx(tx)
         }
 
         if (amountToUse.gt(this.settings.reinvestThreshold)) {
-            console.log("depositing " + amountToUse + " (" + amountFromBalance + "+" + fromUtxos + ") DFI to vault ")
-            const tx = await this.depositToVault(this.settings.tokenId, amountToUse, prevout) //DFI is token 0
+            console.log("swapping " + amountToUse + " DFI to " + this.settings.tokenSymbol)
+            const swapTx = await this.swapToToken("DFI-" + this.settings.tokenSymbol, 0, this.settings.tokenId, amountToUse, prevout)
+            await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.SwapTokens, swapTx.txId)
+            prevout = this.prevOutFromTx(swapTx)
+
+            if (! await this.waitForTx(swapTx.txId)) {
+                await telegram.send("ERROR: swap tokens failed")
+                console.error("swap tokens failed")
+            }
+
+            const tokenBalanceAfterSwap = await this.getTokenBalance(this.settings.tokenSymbol)
+            const amountFromTokenBalanceAfterSwap = new BigNumber(tokenBalanceAfterSwap?.amount ?? "0")
+
+            if (amountFromTokenBalanceAfterSwap.isEqualTo(amountFromTokenBalance)) {
+                await telegram.send("ERROR: amountFromTokenBalanceAfterSwap and amountFromTokenBalance has same size")
+                console.error("amountFromTokenBalanceAfterSwap and amountFromTokenBalance has same size")
+            }
+
+            const commission = amountFromTokenBalanceAfterSwap.minus(amountFromTokenBalance).multipliedBy(this.settings.commission)
+            const amountToUseAfterCommission = amountFromTokenBalanceAfterSwap.minus(commission)
+
+            const commissionTx = await this.sendCommissionToAlpa(this.settings.tokenId, commission, prevout)
+            await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.PayoutCommission, commissionTx.txId)
+            prevout = this.prevOutFromTx(commissionTx)
+
+            if (! await this.waitForTx(commissionTx.txId)) {
+                await telegram.send("ERROR: take commission failed")
+                console.error("take commission failed")
+            }
+
+            console.log("depositing " + amountToUseAfterCommission + " (" + amountFromTokenBalanceAfterSwap + "-" + commission + ") " + this.settings.tokenSymbol + " to vault ")
+
+            const tx = await this.depositToVault(this.settings.tokenId, amountToUseAfterCommission, prevout) //DFI is token 0
             await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.Reinvest, tx.txId)
             if (! await this.waitForTx(tx.txId)) {
                 await telegram.send("ERROR: depositing reinvestment failed")
                 console.error("depositing failed")
                 return false
             } else {
-                await telegram.send("reinvested " + amountToUse.toFixed(4) + " (" + amountFromBalance.toFixed(4) + " tokens, " + fromUtxos.toFixed(4) + " UTXOs) DFI")
+                await telegram.send("reinvested " + amountToUseAfterCommission.toFixed(4) + " (" + amountFromTokenRewardBalance.toFixed(4) + " DFI tokens from reward, "  + amountFromTokenBalance.toFixed(4) + " " + this.settings.tokenSymbol + " tokens from wallet, "  + fromUtxos.toFixed(4) + " UTXOs) " + this.settings.tokenSymbol)
                 console.log("done ")
                 await this.sendMotivationalLog(telegram)
                 return true
