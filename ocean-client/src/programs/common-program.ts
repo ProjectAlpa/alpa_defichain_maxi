@@ -166,7 +166,7 @@ export class CommonProgram {
             fromTokenId: fromToken,
             fromAmount: amount,
             toTokenId: toToken,
-            maxPrice: new BigNumber((await this.client.poolpairs.get(poolPair)).priceRatio.ab ?? "0").multipliedBy(0.02)
+            maxPrice: new BigNumber((await this.client.poolpairs.get(poolPair)).priceRatio.ab ?? "0").multipliedBy(1.02)
         }, script)
 
         return this.sendWithPrevout(txn, prevout)
