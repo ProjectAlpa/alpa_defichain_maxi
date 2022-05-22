@@ -192,8 +192,7 @@ export class CommonProgram {
     async utxoToOwnAccount(amount: BigNumber, prevout: Prevout | undefined = undefined): Promise<CTransactionSegWit> {
         const script = await this.account!.getScript()
 
-        //TODO: also make the TokenId Customizable
-        const balances: ScriptBalances[] = [{ script: script, balances: [{ token: this.settings.tokenId, amount: amount }] }] //DFI has tokenId 0
+        const balances: ScriptBalances[] = [{ script: script, balances: [{ token: 0, amount: amount }] }] //DFI has tokenId 0
         const txn = await this.account!.withTransactionBuilder().account.utxosToAccount({
             to: balances
         }, script)
