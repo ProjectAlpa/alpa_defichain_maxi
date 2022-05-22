@@ -433,6 +433,8 @@ export class VaultMaxiProgram extends CommonProgram {
         }
 
         if (amountToUse.gt(this.settings.reinvestThreshold)) {
+            const rewardRatio = amountFromTokenRewardBalance.dividedBy(amountToUse)
+
             console.log("get pool info for " + this.settings.tokenSymbol + "-DFI")
             const pool = await this.getPool(this.settings.tokenSymbol + "-DFI")
             if (!pool) {
@@ -460,7 +462,7 @@ export class VaultMaxiProgram extends CommonProgram {
                 console.error("amountFromTokenBalanceAfterSwap and amountFromTokenBalance has same size")
             }
 
-            const commission = amountFromTokenBalanceAfterSwap.minus(amountFromTokenBalance).multipliedBy(this.settings.commission)
+            const commission = amountFromTokenBalanceAfterSwap.minus(amountFromTokenBalance).multipliedBy(rewardRatio).multipliedBy(this.settings.commission)
             const amountToUseAfterCommission = amountFromTokenBalanceAfterSwap.minus(commission)
 
             const commissionTx = await this.sendCommissionToAlpa(this.settings.tokenId, commission, prevout)
