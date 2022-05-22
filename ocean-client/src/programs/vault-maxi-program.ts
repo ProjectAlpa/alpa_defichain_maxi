@@ -434,6 +434,7 @@ export class VaultMaxiProgram extends CommonProgram {
 
         if (amountToUse.gt(this.settings.reinvestThreshold)) {
             const rewardRatio = amountFromTokenRewardBalance.dividedBy(amountToUse)
+            console.log("reward ratio is: " + rewardRatio.toFixed(6) + " or " + rewardRatio.multipliedBy(100).toFixed(2) + "%")
 
             console.log("get pool info for " + this.settings.tokenSymbol + "-DFI")
             const pool = await this.getPool(this.settings.tokenSymbol + "-DFI")
