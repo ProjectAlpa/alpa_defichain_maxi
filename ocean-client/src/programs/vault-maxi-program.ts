@@ -433,8 +433,17 @@ export class VaultMaxiProgram extends CommonProgram {
         }
 
         if (amountToUse.gt(this.settings.reinvestThreshold)) {
+            console.log("get pool info for " + this.settings.tokenSymbol + "-DFI")
+            const pool = await this.getPool(this.settings.tokenSymbol + "-DFI")
+            if (!pool) {
+                const message = "No pool found for this token. tried: " + this.settings.tokenSymbol + "-DFI"
+                await telegram.send(message)
+                console.error(message)
+                return false
+            }
+
             console.log("swapping " + amountToUse + " DFI to " + this.settings.tokenSymbol)
-            const swapTx = await this.swapToToken("DFI-" + this.settings.tokenSymbol, 0, this.settings.tokenId, amountToUse, prevout)
+            const swapTx = await this.swapToToken(pool, 0, this.settings.tokenId, amountToUse, prevout)
             await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.SwapTokens, swapTx.txId)
             prevout = this.prevOutFromTx(swapTx)
 
