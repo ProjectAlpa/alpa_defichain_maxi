@@ -414,23 +414,23 @@ export class VaultMaxiProgram extends CommonProgram {
             return false
         }
 
-        const utxoBalance = await this.getUTXOBalance()
+        // const utxoBalance = await this.getUTXOBalance()
         const tokenRewardBalance = await this.getTokenBalance("DFI")
         const tokenBalance = await this.getTokenBalance(this.settings.tokenSymbol)
 
         const amountFromTokenRewardBalance = new BigNumber(tokenRewardBalance?.amount ?? "0")
         const amountFromTokenBalance = new BigNumber(tokenBalance?.amount ?? "0")
-        const fromUtxos = utxoBalance.gt(1) ? utxoBalance.minus(1) : new BigNumber(0)
-        const amountToUse = fromUtxos.plus(amountFromTokenRewardBalance)
+        // const fromUtxos = utxoBalance.gt(1) ? utxoBalance.minus(1) : new BigNumber(0)
+        const amountToUse = amountFromTokenRewardBalance
 
         let prevout: Prevout | undefined = undefined
-        console.log("checking for reinvest: " + fromUtxos + " from UTXOs, " + amountFromTokenRewardBalance + " DFI tokens. total " + amountToUse + " vs " + this.settings.reinvestThreshold)
-        if (amountToUse.gt(this.settings.reinvestThreshold) && fromUtxos.gt(0)) {
-            console.log("converting " + fromUtxos + " UTXOs to DFI token ")
-            const tx = await this.utxoToOwnAccount(fromUtxos)
-            await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.Reinvest, tx.txId)
-            prevout = this.prevOutFromTx(tx)
-        }
+        console.log("checking for reinvest: " + amountFromTokenRewardBalance + " DFI tokens and " + amountFromTokenBalance + " " + this.settings.tokenSymbol + " . total reward " + amountToUse + " vs " + this.settings.reinvestThreshold)
+        // if (amountToUse.gt(this.settings.reinvestThreshold) && fromUtxos.gt(0)) {
+        //     console.log("converting " + fromUtxos + " UTXOs to DFI token ")
+        //     const tx = await this.utxoToOwnAccount(fromUtxos)
+        //     await this.updateToState(ProgramState.WaitingForTransaction, VaultMaxiProgramTransaction.Reinvest, tx.txId)
+        //     prevout = this.prevOutFromTx(tx)
+        // }
 
         if (amountToUse.gt(this.settings.reinvestThreshold)) {
             const rewardRatio = amountFromTokenRewardBalance.dividedBy(amountToUse)
@@ -484,7 +484,7 @@ export class VaultMaxiProgram extends CommonProgram {
                 console.error("depositing failed")
                 return false
             } else {
-                await telegram.send("reinvested " + amountToUseAfterCommission.toFixed(4) + " (" + amountFromTokenRewardBalance.toFixed(4) + " DFI tokens from reward, "  + amountFromTokenBalance.toFixed(4) + " " + this.settings.tokenSymbol + " tokens from wallet, "  + fromUtxos.toFixed(4) + " UTXOs) " + this.settings.tokenSymbol)
+                await telegram.send("reinvested " + amountToUseAfterCommission.toFixed(4) +  " " + this.settings.tokenSymbol + " (" + amountFromTokenRewardBalance.toFixed(4) + " DFI tokens from reward, "  + amountFromTokenBalance.toFixed(4) + " " + this.settings.tokenSymbol + " tokens from wallet)")
                 console.log("done ")
                 await this.sendMotivationalLog(telegram)
                 return true
