@@ -31,16 +31,16 @@ export class StoreAWS implements IStore{
         this.settings.paramPostFix = storePostfix
         let seedkey = process.env.DEFICHAIN_SEED_KEY ?? StoreKey.DeFiWalletSeed
 
-        let TelegramNotificationChatIdKey = StoreKey.TelegramNotificationChatId.replace("-maxi", "-maxi" + storePostfix)
-        let TelegramNotificationTokenKey = StoreKey.TelegramNotificationToken.replace("-maxi", "-maxi" + storePostfix)
-        let TelegramLogsChatIdKey = StoreKey.TelegramLogsChatId.replace("-maxi", "-maxi" + storePostfix)
-        let TelegramLogsTokenKey = StoreKey.TelegramLogsToken.replace("-maxi", "-maxi" + storePostfix)
+        let TelegramNotificationChatIdKey = StoreKey.TelegramNotificationChatId
+        let TelegramNotificationTokenKey = StoreKey.TelegramNotificationToken
+        let TelegramLogsChatIdKey = StoreKey.TelegramLogsChatId
+        let TelegramLogsTokenKey = StoreKey.TelegramLogsToken
         let DeFiAddressKey = StoreKey.DeFiAddress.replace("-maxi", "-maxi" + storePostfix)
         let DeFiVaultKey = StoreKey.DeFiVault.replace("-maxi", "-maxi" + storePostfix)
-        let MinCollateralRatioKey = StoreKey.MinCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
-        let MaxCollateralRatioKey = StoreKey.MaxCollateralRatio.replace("-maxi", "-maxi" + storePostfix)
-        let ReinvestThreshold = StoreKey.ReinvestThreshold.replace("-maxi", "-maxi" + storePostfix)
-        let CommissionKey = StoreKey.Commission.replace("-maxi", "-maxi" + storePostfix)
+        let MinCollateralRatioKey = StoreKey.MinCollateralRatio
+        let MaxCollateralRatioKey = StoreKey.MaxCollateralRatio
+        let ReinvestThreshold = StoreKey.ReinvestThreshold
+        let CommissionKey = StoreKey.Commission
         let TokenIdKey = StoreKey.TokenId.replace("-maxi", "-maxi" + storePostfix)
         let TokenSymbolKey = StoreKey.TokenSymbol.replace("-maxi", "-maxi" + storePostfix)
         let LMTokenKey = StoreKey.LMToken.replace("-maxi", "-maxi" + storePostfix)
